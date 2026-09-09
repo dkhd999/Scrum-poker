@@ -59,6 +59,7 @@ public class GestionHistoriaUsuarioVIsta extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
+        jButton5 = new javax.swing.JButton();
         jLabel12 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
@@ -139,6 +140,8 @@ public class GestionHistoriaUsuarioVIsta extends javax.swing.JFrame {
 
         jButton4.setText("Agregar otra Historia");
 
+        jButton5.setText("Exportar PDF");
+
         jLabel12.setText("Consenso:");
 
         jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
@@ -183,7 +186,9 @@ public class GestionHistoriaUsuarioVIsta extends javax.swing.JFrame {
                                 .addGap(42, 42, 42)
                                 .addComponent(GuardarActualizarHistoria, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(49, 49, 49)
-                                .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
@@ -287,7 +292,8 @@ public class GestionHistoriaUsuarioVIsta extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(GuardarHistoria)
                     .addComponent(GuardarActualizarHistoria)
-                    .addComponent(jButton4))
+                    .addComponent(jButton4)
+                    .addComponent(jButton5))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
@@ -323,6 +329,7 @@ public class GestionHistoriaUsuarioVIsta extends javax.swing.JFrame {
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton5;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -420,6 +427,10 @@ public class GestionHistoriaUsuarioVIsta extends javax.swing.JFrame {
 
     public javax.swing.JButton getBtnAgregarHistoria() {
         return jButton4;
+    }
+
+    public javax.swing.JButton getBtnExportarPdf() {
+        return jButton5;
     }
 
     public javax.swing.JLabel getJLabel10() {

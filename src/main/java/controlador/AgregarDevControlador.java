@@ -1,16 +1,14 @@
 package controlador;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Types;
+import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
+import modelo.Usuario;
 import vista.AgregarDevVista;
 import vista.MenuModerador;
 
-public class AgregarDevController {
+public class AgregarDevControlador {
 
     private AgregarDevVista vista;
     private final int idSala;
@@ -20,7 +18,7 @@ public class AgregarDevController {
     private final MenuModerador menuPadre;
     private Timer timerRefresco;
 
-    public AgregarDevController(AgregarDevVista vista, int idSala, String codigo, int idUsuario, String nickname, MenuModerador menuPadre) {
+    public AgregarDevControlador(AgregarDevVista vista, int idSala, String codigo, int idUsuario, String nickname, MenuModerador menuPadre) {
         this.vista = vista;
         this.idSala = idSala;
         this.codigo = codigo;
@@ -74,18 +72,15 @@ public class AgregarDevController {
         refrescarDevs();
     }
 
-    private Connection obtenerConexion() throws Exception {
-        ConexionBDD db = new ConexionBDD();
-        return db.conectar();
-    }
-
     private void crearDev() {
         String devNickname = vista.getTxtNickname().getText().trim();
         if (devNickname.isEmpty()) {
             JOptionPane.showMessageDialog(vista, "Ingrese un nickname para el desarrollador.", "Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        int[] resultado = crearDevDB(idSala, devNickname);
+        int[] resultado;
+        try { resultado = Usuario.crearDesarrollador(idSala, devNickname); }
+        catch (Exception e) { System.out.println("Error al crear dev: " + e.getMessage()); resultado = new int[]{0, -2}; }
         if (resultado[1] == 0) {
             JOptionPane.showMessageDialog(vista, "Desarrollador '" + devNickname + "' creado correctamente.", "Exito", JOptionPane.INFORMATION_MESSAGE);
             vista.getTxtNickname().setText("");
@@ -109,10 +104,12 @@ public class AgregarDevController {
             JOptionPane.showMessageDialog(vista, "Ingrese el nuevo nickname en el campo.", "Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        int[] resultado = actualizarDevDB(idDev, nuevoNickname);
-        if (resultado[0] == -1) {
+        int resultado;
+        try { resultado = Usuario.actualizarDesarrollador(idDev, nuevoNickname); }
+        catch (Exception e) { System.out.println("Error al actualizar dev: " + e.getMessage()); resultado = -3; }
+        if (resultado == -1) {
             JOptionPane.showMessageDialog(vista, "El nickname '" + nuevoNickname + "' ya existe en la sala.", "Error", JOptionPane.ERROR_MESSAGE);
-        } else if (resultado[0] == -2) {
+        } else if (resultado == -2) {
             JOptionPane.showMessageDialog(vista, "El usuario seleccionado no es un desarrollador.", "Error", JOptionPane.ERROR_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(vista, "Desarrollador actualizado correctamente.", "Exito", JOptionPane.INFORMATION_MESSAGE);
@@ -127,7 +124,8 @@ public class AgregarDevController {
             return;
         }
         int idDev = (Integer) vista.getTblDev().getValueAt(fila, 0);
-        inhabilitarDevDB(idDev);
+        try { Usuario.cambiarEstadoDesarrollador(idDev, false); }
+        catch (Exception e) { System.out.println("Error al inhabilitar dev: " + e.getMessage()); }
         JOptionPane.showMessageDialog(vista, "Desarrollador inhabilitado correctamente.", "Exito", JOptionPane.INFORMATION_MESSAGE);
         refrescarDevs();
     }
@@ -139,7 +137,8 @@ public class AgregarDevController {
             return;
         }
         int idDev = (Integer) vista.getTblDev().getValueAt(fila, 0);
-        habilitarDevDB(idDev);
+        try { Usuario.cambiarEstadoDesarrollador(idDev, true); }
+        catch (Exception e) { System.out.println("Error al habilitar dev: " + e.getMessage()); }
         JOptionPane.showMessageDialog(vista, "Desarrollador habilitado correctamente.", "Exito", JOptionPane.INFORMATION_MESSAGE);
         refrescarDevs();
     }
@@ -155,70 +154,14 @@ public class AgregarDevController {
         }
     }
 
-    public int[] crearDevDB(int idSala, String devNickname) {
-        int[] resultado = new int[2];
-        try (Connection conn = obtenerConexion()) {
-            CallableStatement cs = conn.prepareCall("{CALL sp_crear_dev(?, ?, ?, ?)}");
-            cs.setInt(1, idSala);
-            cs.setString(2, devNickname);
-            cs.registerOutParameter(3, Types.INTEGER);
-            cs.registerOutParameter(4, Types.INTEGER);
-            cs.execute();
-            resultado[0] = cs.getInt(3);
-            resultado[1] = cs.getInt(4);
-        } catch (Exception e) {
-            System.out.println("Error al crear dev: " + e.getMessage());
-        }
-        return resultado;
-    }
-
-    public int[] actualizarDevDB(int idDev, String nuevoNickname) {
-        int[] resultado = new int[1];
-        try (Connection conn = obtenerConexion()) {
-            CallableStatement cs = conn.prepareCall("{CALL sp_actualizar_dev(?, ?, ?)}");
-            cs.setInt(1, idDev);
-            cs.setString(2, nuevoNickname);
-            cs.registerOutParameter(3, Types.INTEGER);
-            cs.execute();
-            resultado[0] = cs.getInt(3);
-        } catch (Exception e) {
-            System.out.println("Error al actualizar dev: " + e.getMessage());
-        }
-        return resultado;
-    }
-
-    public void inhabilitarDevDB(int idDev) {
-        try (Connection conn = obtenerConexion()) {
-            CallableStatement cs = conn.prepareCall("{CALL sp_inhabilitar_dev(?)}");
-            cs.setInt(1, idDev);
-            cs.execute();
-        } catch (Exception e) {
-            System.out.println("Error al inhabilitar dev: " + e.getMessage());
-        }
-    }
-
-    public void habilitarDevDB(int idDev) {
-        try (Connection conn = obtenerConexion()) {
-            CallableStatement cs = conn.prepareCall("{CALL sp_habilitar_dev(?)}");
-            cs.setInt(1, idDev);
-            cs.execute();
-        } catch (Exception e) {
-            System.out.println("Error al habilitar dev: " + e.getMessage());
-        }
-    }
-
     private void refrescarDevs() {
         DefaultTableModel modelDevs = (DefaultTableModel) vista.getTblDev().getModel();
         modelDevs.setRowCount(0);
-        try (Connection conn = obtenerConexion()) {
-            CallableStatement cs = conn.prepareCall("{CALL sp_listar_devs(?)}");
-            cs.setInt(1, idSala);
-            ResultSet rs = cs.executeQuery();
-            while (rs.next()) {
+        try {
+            List<Usuario> usuarios = Usuario.listarDesarrolladores(idSala);
+            for (Usuario usuario : usuarios) {
                 modelDevs.addRow(new Object[]{
-                    rs.getInt("id_usuario"),
-                    rs.getString("nickname"),
-                    rs.getString("estado")
+                    usuario.getIdUsuario(), usuario.getNickname(), usuario.getEstado()
                 });
             }
         } catch (Exception e) {

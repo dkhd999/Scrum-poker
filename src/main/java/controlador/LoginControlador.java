@@ -1,23 +1,20 @@
 package controlador;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Types;
 import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
+import modelo.Sala;
+import modelo.Usuario;
 import vista.RegistrarVotoVista;
 import vista.LoginVista;
 import vista.MenuModerador;
 
-public class LoginController {
+public class LoginControlador {
 
     private LoginVista vista;
     private final ButtonGroup grupoRoles;
     private String ultimoError = null;
 
-    public LoginController() {
+    public LoginControlador() {
         this.grupoRoles = new ButtonGroup();
     }
 
@@ -88,7 +85,7 @@ public class LoginController {
 
     private void abrirMenuModerador(int idSala, String codigo, String nickname, int idUsuario) {
         MenuModerador menuModerador = new MenuModerador();
-        MenuModeradorController controllerMenu = new MenuModeradorController(menuModerador, idSala, codigo, idUsuario, nickname);
+        MenuModeradorControlador controllerMenu = new MenuModeradorControlador(menuModerador, idSala, codigo, idUsuario, nickname);
         menuModerador.setVisible(true);
         vista.dispose();
     }
@@ -108,7 +105,7 @@ public class LoginController {
                 abrirMenuModerador(idSala, codigo, nickname, idUsuario);
             } else {
                 RegistrarVotoVista vistaVotante = new RegistrarVotoVista();
-                RegistrarVotoController controllerVotante = new RegistrarVotoController(vistaVotante, idSala, codigo, nickname, "VOTANTE", idUsuario);
+                RegistrarVotoControlador controllerVotante = new RegistrarVotoControlador(vistaVotante, idSala, codigo, nickname, "VOTANTE", idUsuario);
                 vistaVotante.setVisible(true);
                 vista.dispose();
             }
@@ -126,51 +123,24 @@ public class LoginController {
     }
 
     private String obtenerRolBD(int idUsuario) {
-        try (Connection conn = obtenerConexion();
-             PreparedStatement ps = conn.prepareStatement("SELECT rol FROM usuarios WHERE id_usuario = ?")) {
-            ps.setInt(1, idUsuario);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getString(1);
-                }
-            }
+        try {
+            return Usuario.obtenerRol(idUsuario);
         } catch (Exception e) {
             System.out.println("Error al obtener rol: " + e.getMessage());
         }
         return null;
     }
 
-    private Connection obtenerConexion() throws Exception {
-        ConexionBDD db = new ConexionBDD();
-        return db.conectar();
-    }
-
     public int[] crearSala(String codigo, String nickname, String titulo, String descripcion, String prioridad, String puntosEstimados) {
         int[] resultado = new int[2];
         resultado[0] = -1;
         resultado[1] = -1;
-        try (Connection conn = obtenerConexion()) {
-            try (CallableStatement cs = conn.prepareCall("{CALL sp_crear_sala(?, ?)}")) {
-                cs.setString(1, codigo);
-                cs.registerOutParameter(2, Types.INTEGER);
-                cs.execute();
-                resultado[1] = cs.getInt(2);
-            }
+        try {
+            resultado[1] = Sala.crear(codigo);
             if (resultado[1] > 0) {
-                try (CallableStatement cs = conn.prepareCall("{CALL sp_unirse_sala(?, ?, ?, ?, ?, ?, ?, ?, ?)}")) {
-                    cs.setString(1, codigo);
-                    cs.setString(2, nickname);
-                    cs.setString(3, "PRODUCT_OWNER_MODERADOR");
-                    cs.setString(4, titulo);
-                    cs.setString(5, descripcion);
-                    cs.setString(6, prioridad);
-                    cs.setString(7, puntosEstimados);
-                    cs.registerOutParameter(8, Types.INTEGER);
-                    cs.registerOutParameter(9, Types.INTEGER);
-                    cs.execute();
-                    resultado[0] = cs.getInt(8);
-                    resultado[1] = cs.getInt(9);
-                }
+                int[] ingreso = Usuario.ingresarASala(codigo, nickname, "PRODUCT_OWNER_MODERADOR", titulo, descripcion, prioridad, puntosEstimados);
+                resultado[0] = ingreso[0];
+                resultado[1] = ingreso[1];
             }
         } catch (Exception e) {
             System.out.println("Error al crear sala: " + e.getMessage());
@@ -187,20 +157,10 @@ public class LoginController {
         ultimoError = null;
         resultado[0] = -1;
         resultado[1] = -1;
-        try (Connection conn = obtenerConexion()) {
-            CallableStatement cs = conn.prepareCall("{CALL sp_unirse_sala(?, ?, ?, ?, ?, ?, ?, ?, ?)}");
-            cs.setString(1, codigo);
-            cs.setString(2, nickname);
-            cs.setString(3, rol);
-            cs.setString(4, null);
-            cs.setString(5, null);
-            cs.setString(6, null);
-            cs.setString(7, null);
-            cs.registerOutParameter(8, Types.INTEGER);
-            cs.registerOutParameter(9, Types.INTEGER);
-            cs.execute();
-            resultado[0] = cs.getInt(8);
-            resultado[1] = cs.getInt(9);
+        try {
+            int[] ingreso = Usuario.ingresarASala(codigo, nickname, rol, null, null, null, null);
+            resultado[0] = ingreso[0];
+            resultado[1] = ingreso[1];
         } catch (Exception e) {
             ultimoError = e.getMessage();
             System.out.println("Error al unirse a sala: " + e.getMessage());

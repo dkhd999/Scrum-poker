@@ -4,7 +4,7 @@ import vista.AgregarDevVista;
 import vista.GestionHistoriaUsuarioVIsta;
 import vista.MenuModerador;
 
-public class MenuModeradorController {
+public class MenuModeradorControlador {
 
     private MenuModerador vista;
     private final int idSala;
@@ -12,7 +12,7 @@ public class MenuModeradorController {
     private final String codigo;
     private final String nickname;
 
-    public MenuModeradorController(MenuModerador vista, int idSala, String codigo, int idUsuario, String nickname) {
+    public MenuModeradorControlador(MenuModerador vista, int idSala, String codigo, int idUsuario, String nickname) {
         this.vista = vista;
         this.idSala = idSala;
         this.codigo = codigo;
@@ -28,13 +28,13 @@ public class MenuModeradorController {
 
     private void abrirAgregarDev() {
         AgregarDevVista devVista = new AgregarDevVista();
-        new AgregarDevController(devVista, idSala, codigo, idUsuario, nickname, vista);
+        new AgregarDevControlador(devVista, idSala, codigo, idUsuario, nickname, vista);
         devVista.setVisible(true);
     }
 
     private void abrirGestionHistoria() {
         GestionHistoriaUsuarioVIsta historiaVista = new GestionHistoriaUsuarioVIsta();
-        new GestionHistoriaUsuarioController(historiaVista, idSala, codigo, idUsuario, nickname, vista);
+        new GestionHistoriaUsuarioControlador(historiaVista, idSala, codigo, idUsuario, nickname, vista);
         historiaVista.setVisible(true);
     }
 }

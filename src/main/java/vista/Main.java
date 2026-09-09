@@ -1,6 +1,6 @@
 package vista;
 
-import controlador.LoginController;
+import controlador.LoginControlador;
 import javax.swing.UIManager;
 
 public class Main {
@@ -19,7 +19,7 @@ public class Main {
 
         java.awt.EventQueue.invokeLater(() -> {
             LoginVista loginVista = new LoginVista();
-            LoginController loginController = new LoginController();
+            LoginControlador loginController = new LoginControlador();
             loginController.setVista(loginVista);
             loginVista.setVisible(true);
         });

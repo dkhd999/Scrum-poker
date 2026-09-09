@@ -84,6 +84,24 @@ public abstract class Usuario implements IVotable {
         }
     }
 
+    public static int[] ingresarASala(String codigo, String nickname, String rol,
+            String titulo, String descripcion, String prioridad, String puntos) throws Exception {
+        try (Connection conn = new ConexionBDD().conectar();
+             CallableStatement cs = conn.prepareCall("{CALL sp_unirse_sala(?, ?, ?, ?, ?, ?, ?, ?, ?)}")) {
+            cs.setString(1, codigo);
+            cs.setString(2, nickname);
+            cs.setString(3, rol);
+            cs.setString(4, titulo);
+            cs.setString(5, descripcion);
+            cs.setString(6, prioridad);
+            cs.setString(7, puntos);
+            cs.registerOutParameter(8, Types.INTEGER);
+            cs.registerOutParameter(9, Types.INTEGER);
+            cs.execute();
+            return new int[]{cs.getInt(8), cs.getInt(9)};
+        }
+    }
+
     public static int[] crearDesarrollador(int idSala, String nickname) throws Exception {
         try (Connection conn = new ConexionBDD().conectar();
              CallableStatement cs = conn.prepareCall("{CALL sp_crear_dev(?, ?, ?, ?)}")) {
@@ -121,10 +139,14 @@ public abstract class Usuario implements IVotable {
         try (Connection conn = new ConexionBDD().conectar();
              CallableStatement cs = conn.prepareCall("{CALL sp_listar_devs(?)}")) {
             cs.setInt(1, idSala);
-            cs.setInt(1, idSala);
             try (ResultSet rs = cs.executeQuery()) {
                 while (rs.next()) {
-                    Usuario usuario = new Votante(rs.getInt("id_usuario"), rs.getString("nickname"), idSala);
+                        Votante votante = new Votante(
+                            rs.getInt("id_usuario"),
+                            rs.getString("nickname"),
+                            idSala
+                        );
+                        Usuario usuario = votante;
                     usuario.setEstado(rs.getString("estado"));
                     usuarios.add(usuario);
                 }

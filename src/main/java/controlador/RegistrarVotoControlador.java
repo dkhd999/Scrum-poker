@@ -1,16 +1,14 @@
 package controlador;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
+import modelo.EstadoSala;
+import modelo.MetricasVoto;
+import modelo.Voto;
 import vista.RegistrarVotoVista;
 
-public class RegistrarVotoController {
+public class RegistrarVotoControlador {
 
     private RegistrarVotoVista vista;
     private final int idSala;
@@ -21,7 +19,7 @@ public class RegistrarVotoController {
     private Timer timerRefresco;
     private boolean cartasReveladas = false;
 
-    public RegistrarVotoController(RegistrarVotoVista vista, int idSala, String codigo, String nickname, String rol, int idUsuario) {
+    public RegistrarVotoControlador(RegistrarVotoVista vista, int idSala, String codigo, String nickname, String rol, int idUsuario) {
         this.vista = vista;
         this.idSala = idSala;
         this.codigo = codigo;
@@ -72,23 +70,14 @@ public class RegistrarVotoController {
         return "PRODUCT_OWNER_MODERADOR".equals(rol);
     }
 
-    private Connection obtenerConexion() throws Exception {
-        ConexionBDD db = new ConexionBDD();
-        return db.conectar();
-    }
-
     private void emitirVoto() {
         Object carta = vista.getCmbMiCarta().getSelectedItem();
         if (carta == null) {
             JOptionPane.showMessageDialog(vista, "Seleccione una carta.", "Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        try (Connection conn = obtenerConexion()) {
-            CallableStatement cs = conn.prepareCall("{CALL sp_emitir_voto(?, ?, ?)}");
-            cs.setInt(1, idSala);
-            cs.setInt(2, idUsuario);
-            cs.setString(3, carta.toString());
-            cs.execute();
+        try {
+            Voto.emitir(idSala, idUsuario, carta.toString());
         } catch (Exception ex) {
             System.out.println("Error al registrar voto: " + ex.getMessage());
         }
@@ -99,61 +88,41 @@ public class RegistrarVotoController {
     // moderador y se gestionan desde la vista GestionHistoriaUsuarioVIsta.
 
     private void refrescarEstado() {
-        List<VotoItem> votos = new ArrayList<>();
-        String histTitulo = null, histDescripcion = null, histPrioridad = null, histPuntos = null;
-
-        try (Connection conn = obtenerConexion()) {
-            CallableStatement cs = conn.prepareCall("{CALL sp_obtener_votos(?)}");
-            cs.setInt(1, idSala);
-            ResultSet rs = cs.executeQuery();
-            while (rs.next()) {
-                boolean reveladas = rs.getBoolean("cartas_reveladas");
-                cartasReveladas = reveladas;
-                VotoItem v = new VotoItem(
-                    rs.getString("nickname"),
-                    rs.getString("rol"),
-                    rs.getString("carta"),
-                    reveladas
-                );
-                votos.add(v);
-
-                if (rs.getString("historia_titulo") != null && histTitulo == null) {
-                    histTitulo = rs.getString("historia_titulo");
-                    histDescripcion = rs.getString("historia_descripcion");
-                    histPrioridad = rs.getString("historia_prioridad");
-                    histPuntos = rs.getString("historia_puntos");
-                }
-            }
+        EstadoSala estado;
+        try {
+            estado = EstadoSala.obtener(idSala);
+            cartasReveladas = estado.isCartasReveladas();
         } catch (Exception e) {
             System.out.println("Error al obtener estado: " + e.getMessage());
+            return;
         }
 
         DefaultTableModel modelVotantes = (DefaultTableModel) vista.getTblVotante().getModel();
         modelVotantes.setRowCount(0);
-        for (VotoItem v : votos) {
-            String rolMostrar = "PRODUCT_OWNER_MODERADOR".equals(v.rol) ? "Moderador" : "Votante";
+        for (Voto v : estado.getVotos()) {
+            String rolMostrar = "PRODUCT_OWNER_MODERADOR".equals(v.getRol()) ? "Moderador" : "Votante";
             String cartaMostrar;
-            String estado;
-            if (v.reveladas) {
-                cartaMostrar = v.carta != null && !v.carta.isEmpty() ? v.carta : "-";
-                estado = "Revelado";
+            String estadoMostrar;
+            if (v.isCartasReveladas()) {
+                cartaMostrar = v.getCarta() != null && !v.getCarta().isEmpty() ? v.getCarta() : "-";
+                estadoMostrar = "Revelado";
             } else {
-                if (v.carta != null && !v.carta.isEmpty()) {
+                if (v.getCarta() != null && !v.getCarta().isEmpty()) {
                     cartaMostrar = "-";
-                    estado = "\u2713 Listo";
+                    estadoMostrar = "\u2713 Listo";
                 } else {
                     cartaMostrar = "-";
-                    estado = "Pendiente";
+                    estadoMostrar = "Pendiente";
                 }
             }
-            modelVotantes.addRow(new Object[]{v.nickname, rolMostrar, cartaMostrar, estado});
+            modelVotantes.addRow(new Object[]{v.getNickname(), rolMostrar, cartaMostrar, estadoMostrar});
         }
 
-        if (histTitulo != null) {
-            vista.getTxtTitulo().setText(histTitulo);
-            vista.getTxtDescripcion().setText(histDescripcion != null ? histDescripcion : "");
-            seleccionarCombo(vista.getCmbPrioridad(), histPrioridad);
-            seleccionarCombo(vista.getCmbPuntosEstimados(), histPuntos);
+        if (estado.getHistoriaActiva() != null) {
+            vista.getTxtTitulo().setText(estado.getHistoriaActiva().getTitulo());
+            vista.getTxtDescripcion().setText(estado.getHistoriaActiva().getDescripcion() != null ? estado.getHistoriaActiva().getDescripcion() : "");
+            seleccionarCombo(vista.getCmbPrioridad(), estado.getHistoriaActiva().getPrioridad());
+            seleccionarCombo(vista.getCmbPuntosEstimados(), estado.getHistoriaActiva().getPuntosEstimados());
         } else {
             vista.getTxtTitulo().setText("");
             vista.getTxtDescripcion().setText("");
@@ -163,19 +132,11 @@ public class RegistrarVotoController {
     }
 
     private void actualizarMetricas() {
-        try (Connection conn = obtenerConexion();
-             CallableStatement cs = conn.prepareCall("{CALL sp_obtener_metricas_votos(?)}")) {
-            cs.setInt(1, idSala);
-            try (ResultSet rs = cs.executeQuery()) {
-                if (rs.next()) {
-                    Object promedio = rs.getObject("promedio");
-                    Object mediana = rs.getObject("mediana");
-                    String consenso = rs.getString("consenso");
-                    vista.getLblPromedio().setText(formatearMetrica(promedio));
-                    vista.getLblMediana().setText(formatearMetrica(mediana));
-                    vista.getLblConsenso().setText(consenso != null ? consenso : "-");
-                }
-            }
+        try {
+            MetricasVoto metricas = MetricasVoto.obtenerPorSala(idSala);
+            vista.getLblPromedio().setText(formatearMetrica(metricas.getPromedio()));
+            vista.getLblMediana().setText(formatearMetrica(metricas.getMediana()));
+            vista.getLblConsenso().setText(metricas.getConsenso() != null ? metricas.getConsenso() : "-");
         } catch (Exception e) {
             vista.getLblPromedio().setText("Error");
             vista.getLblMediana().setText("Error");
@@ -184,7 +145,7 @@ public class RegistrarVotoController {
         }
     }
 
-    private String formatearMetrica(Object valor) {
+    private String formatearMetrica(Double valor) {
         return valor == null ? "-" : String.format("%.2f", ((Number) valor).doubleValue());
     }
 
@@ -198,17 +159,4 @@ public class RegistrarVotoController {
         }
     }
 
-    private static class VotoItem {
-        String nickname;
-        String rol;
-        String carta;
-        boolean reveladas;
-
-        VotoItem(String nickname, String rol, String carta, boolean reveladas) {
-            this.nickname = nickname;
-            this.rol = rol;
-            this.carta = carta;
-            this.reveladas = reveladas;
-        }
-    }
 }

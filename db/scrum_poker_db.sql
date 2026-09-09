@@ -59,9 +59,14 @@ CREATE TABLE votos (
     id_voto INT AUTO_INCREMENT PRIMARY KEY,
     id_sala INT NOT NULL,
     id_usuario INT NOT NULL,
+    id_historia INT NULL,
     carta VARCHAR(10),
+    promedio DECIMAL(10, 2) NULL,
+    mediana DECIMAL(10, 2) NULL,
+    consenso VARCHAR(2) NULL,
     FOREIGN KEY (id_sala) REFERENCES salas(id_sala) ON DELETE CASCADE,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (id_historia) REFERENCES historias_usuario(id_historia) ON DELETE SET NULL,
     UNIQUE KEY voto_unico_usuario (id_sala, id_usuario)
 );
 
@@ -173,9 +178,16 @@ CREATE PROCEDURE sp_emitir_voto(
     IN p_carta VARCHAR(10)
 )
 BEGIN
-    INSERT INTO votos (id_sala, id_usuario, carta)
-    VALUES (p_id_sala, p_id_usuario, p_carta)
-    ON DUPLICATE KEY UPDATE carta = p_carta;
+    DECLARE v_id_historia INT DEFAULT NULL;
+    SELECT h.id_historia INTO v_id_historia
+    FROM historias_usuario h
+    JOIN usuarios u ON u.id_usuario = h.id_usuario
+    WHERE u.id_sala = p_id_sala AND u.rol = 'PRODUCT_OWNER_MODERADOR' AND h.activa = TRUE
+    LIMIT 1;
+    INSERT INTO votos (id_sala, id_usuario, id_historia, carta, promedio, mediana, consenso)
+    VALUES (p_id_sala, p_id_usuario, v_id_historia, p_carta, NULL, NULL, NULL)
+    ON DUPLICATE KEY UPDATE id_historia = v_id_historia, carta = p_carta,
+        promedio = NULL, mediana = NULL, consenso = NULL;
 END //
 
 -- SP 6: Revelar Cartas de la Sala
@@ -183,7 +195,35 @@ CREATE PROCEDURE sp_revelar_cartas(
     IN p_id_sala INT
 )
 BEGIN
+    DECLARE v_id_historia INT DEFAULT NULL;
+    DECLARE v_cantidad INT DEFAULT 0;
+    DECLARE v_inicio INT DEFAULT 0;
+    DECLARE v_promedio DECIMAL(10, 2) DEFAULT NULL;
+    DECLARE v_mediana DECIMAL(10, 2) DEFAULT NULL;
+    DECLARE v_minimo DECIMAL(10, 2) DEFAULT NULL;
+    DECLARE v_maximo DECIMAL(10, 2) DEFAULT NULL;
+    SELECT h.id_historia INTO v_id_historia
+    FROM historias_usuario h JOIN usuarios u ON u.id_usuario = h.id_usuario
+    WHERE u.id_sala = p_id_sala AND u.rol = 'PRODUCT_OWNER_MODERADOR' AND h.activa = TRUE
+    LIMIT 1;
     UPDATE salas SET cartas_reveladas = TRUE WHERE id_sala = p_id_sala;
+    CREATE TEMPORARY TABLE tmp_revelar_votos (valor DECIMAL(10, 2));
+    INSERT INTO tmp_revelar_votos
+    SELECT CAST(carta AS DECIMAL(10, 2)) FROM votos
+    WHERE id_sala = p_id_sala AND id_historia = v_id_historia
+      AND carta REGEXP '^[0-9]+([.][0-9]+)?$';
+    SELECT COUNT(*), AVG(valor), MIN(valor), MAX(valor)
+    INTO v_cantidad, v_promedio, v_minimo, v_maximo
+    FROM tmp_revelar_votos;
+    IF v_cantidad > 0 THEN
+        SET v_inicio = FLOOR((v_cantidad - 1) / 2);
+        SELECT AVG(valor) INTO v_mediana
+        FROM (SELECT valor FROM tmp_revelar_votos ORDER BY valor LIMIT v_inicio, 2) AS centrales;
+    END IF;
+    UPDATE votos SET promedio = v_promedio, mediana = v_mediana,
+        consenso = IF(v_cantidad > 0 AND v_minimo = v_maximo, 'SI', 'NO')
+    WHERE id_sala = p_id_sala AND id_historia = v_id_historia;
+    DROP TEMPORARY TABLE tmp_revelar_votos;
 END //
 
 -- SP 7: Obtener Estado de la Sala (Votos, Participantes e Historia Activa)

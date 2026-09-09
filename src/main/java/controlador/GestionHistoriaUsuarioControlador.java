@@ -12,7 +12,7 @@ import modelo.Voto;
 import vista.GestionHistoriaUsuarioVIsta;
 import vista.MenuModerador;
 
-public class GestionHistoriaUsuarioController {
+public class GestionHistoriaUsuarioControlador {
 
     private GestionHistoriaUsuarioVIsta vista;
     private final int idSala;
@@ -25,7 +25,7 @@ public class GestionHistoriaUsuarioController {
     private boolean preparandoNuevaHistoria = false;
     private int historiaActivaId = -1;
 
-    public GestionHistoriaUsuarioController(GestionHistoriaUsuarioVIsta vista, int idSala, String codigo, int idUsuario, String nickname, MenuModerador menuPadre) {
+    public GestionHistoriaUsuarioControlador(GestionHistoriaUsuarioVIsta vista, int idSala, String codigo, int idUsuario, String nickname, MenuModerador menuPadre) {
         this.vista = vista;
         this.idSala = idSala;
         this.codigo = codigo;
@@ -79,12 +79,7 @@ public class GestionHistoriaUsuarioController {
         vista.getBtnRevelarCartas().addActionListener(e -> revelarCartas());
         vista.getBtnNuevaRonda().addActionListener(e -> nuevaRonda());
         vista.getBtnAgregarHistoria().addActionListener(e -> agregarOtraHistoria());
-        vista.getBtnExportarPdf().addActionListener(e -> exportarReporte());
         vista.getBtnVolver().addActionListener(e -> volverAlMenu());
-    }
-
-    private void exportarReporte() {
-        new ExportarReporteSalaController(idSala).exportar(vista);
     }
 
     private void agregarOtraHistoria() {

@@ -448,6 +448,11 @@
         <Property name="text" type="java.lang.String" value="Agregar otra Historia"/>
       </Properties>
     </Component>
+    <Component class="javax.swing.JButton" name="jButton5">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Exportar PDF"/>
+      </Properties>
+    </Component>
     <Component class="javax.swing.JLabel" name="jLabel12">
       <Properties>
         <Property name="text" type="java.lang.String" value="Consenso:"/>
