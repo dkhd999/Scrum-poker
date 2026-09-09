@@ -31,6 +31,7 @@ public class MenuModerador extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         btnAgregarDev = new javax.swing.JButton();
         brtnGestionHisatoriaUsuario = new javax.swing.JButton();
+        btnExportarPdf = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -40,6 +41,8 @@ public class MenuModerador extends javax.swing.JFrame {
         btnAgregarDev.setText("Ingresar a Agregar Desarrollador");
 
         brtnGestionHisatoriaUsuario.setText("Ingresar a Gestion Historia de Usuarios");
+
+        btnExportarPdf.setText("Exportar reporte PDF");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -54,7 +57,8 @@ public class MenuModerador extends javax.swing.JFrame {
                         .addGap(106, 106, 106)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(brtnGestionHisatoriaUsuario, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnAgregarDev, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(btnAgregarDev, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnExportarPdf, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap(86, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -66,6 +70,8 @@ public class MenuModerador extends javax.swing.JFrame {
                 .addComponent(btnAgregarDev)
                 .addGap(29, 29, 29)
                 .addComponent(brtnGestionHisatoriaUsuario)
+                .addGap(29, 29, 29)
+                .addComponent(btnExportarPdf)
                 .addContainerGap(68, Short.MAX_VALUE))
         );
 
@@ -81,6 +87,7 @@ public class MenuModerador extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton brtnGestionHisatoriaUsuario;
     private javax.swing.JButton btnAgregarDev;
+    private javax.swing.JButton btnExportarPdf;
     private javax.swing.JLabel jLabel2;
     // End of variables declaration//GEN-END:variables
 
@@ -90,5 +97,9 @@ public class MenuModerador extends javax.swing.JFrame {
 
     public javax.swing.JButton getBrtnGestionHisatoriaUsuario() {
         return brtnGestionHisatoriaUsuario;
+    }
+
+    public javax.swing.JButton getBtnExportarPdf() {
+        return btnExportarPdf;
     }
 }

@@ -34,6 +34,7 @@
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Component id="brtnGestionHisatoriaUsuario" max="32767" attributes="0"/>
                           <Component id="btnAgregarDev" max="32767" attributes="0"/>
+                          <Component id="btnExportarPdf" max="32767" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
@@ -50,6 +51,8 @@
               <Component id="btnAgregarDev" min="-2" max="-2" attributes="0"/>
               <EmptySpace min="-2" pref="29" max="-2" attributes="0"/>
               <Component id="brtnGestionHisatoriaUsuario" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="29" max="-2" attributes="0"/>
+              <Component id="btnExportarPdf" min="-2" max="-2" attributes="0"/>
               <EmptySpace pref="68" max="32767" attributes="0"/>
           </Group>
       </Group>
@@ -72,6 +75,11 @@
     <Component class="javax.swing.JButton" name="brtnGestionHisatoriaUsuario">
       <Properties>
         <Property name="text" type="java.lang.String" value="Ingresar a Gestion Historia de Usuarios"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="btnExportarPdf">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Exportar reporte PDF"/>
       </Properties>
     </Component>
   </SubComponents>

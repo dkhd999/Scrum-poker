@@ -3,6 +3,7 @@ package controlador;
 import vista.AgregarDevVista;
 import vista.GestionHistoriaUsuarioVIsta;
 import vista.MenuModerador;
+import vista.ReportePDFVista;
 
 public class MenuModeradorControlador {
 
@@ -24,6 +25,7 @@ public class MenuModeradorControlador {
     private void configurarEventos() {
         vista.getBtnAgregarDev().addActionListener(e -> abrirAgregarDev());
         vista.getBrtnGestionHisatoriaUsuario().addActionListener(e -> abrirGestionHistoria());
+        vista.getBtnExportarPdf().addActionListener(e -> abrirReportePdf());
     }
 
     private void abrirAgregarDev() {
@@ -36,5 +38,11 @@ public class MenuModeradorControlador {
         GestionHistoriaUsuarioVIsta historiaVista = new GestionHistoriaUsuarioVIsta();
         new GestionHistoriaUsuarioControlador(historiaVista, idSala, codigo, idUsuario, nickname, vista);
         historiaVista.setVisible(true);
+    }
+
+    private void abrirReportePdf() {
+        ReportePDFVista reporteVista = new ReportePDFVista();
+        new ReportePDFControlador(reporteVista, idSala, codigo);
+        reporteVista.setVisible(true);
     }
 }
