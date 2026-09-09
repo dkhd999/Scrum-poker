@@ -75,6 +75,23 @@ CREATE TABLE votos (
 -- =====================================================
 DELIMITER //
 
+DROP PROCEDURE IF EXISTS sp_crear_sala //
+DROP PROCEDURE IF EXISTS sp_unirse_sala //
+DROP PROCEDURE IF EXISTS sp_crear_historia //
+DROP PROCEDURE IF EXISTS sp_actualizar_historia //
+DROP PROCEDURE IF EXISTS sp_emitir_voto //
+DROP PROCEDURE IF EXISTS sp_revelar_cartas //
+DROP PROCEDURE IF EXISTS sp_obtener_votos //
+DROP PROCEDURE IF EXISTS sp_obtener_historial_historias //
+DROP PROCEDURE IF EXISTS sp_obtener_metricas_votos //
+DROP PROCEDURE IF EXISTS sp_preparar_nueva_historia //
+DROP PROCEDURE IF EXISTS sp_crear_dev //
+DROP PROCEDURE IF EXISTS sp_listar_devs //
+DROP PROCEDURE IF EXISTS sp_actualizar_dev //
+DROP PROCEDURE IF EXISTS sp_inhabilitar_dev //
+DROP PROCEDURE IF EXISTS sp_habilitar_dev //
+DROP PROCEDURE IF EXISTS sp_reiniciar_votacion //
+
 -- SP 1: Crear una Sala
 CREATE PROCEDURE sp_crear_sala(
     IN p_codigo VARCHAR(10),

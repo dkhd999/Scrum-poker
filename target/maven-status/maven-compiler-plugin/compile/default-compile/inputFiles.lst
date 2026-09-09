@@ -7,6 +7,7 @@ C:\Users\Usuario\OneDrive\Documentos\NetBeansProjects\ScrumPoker\src\main\java\c
 C:\Users\Usuario\OneDrive\Documentos\NetBeansProjects\ScrumPoker\src\main\java\controlador\MenuModeradorControlador.java
 C:\Users\Usuario\OneDrive\Documentos\NetBeansProjects\ScrumPoker\src\main\java\controlador\RegistrarVotoControlador.java
 C:\Users\Usuario\OneDrive\Documentos\NetBeansProjects\ScrumPoker\src\main\java\controlador\ReportePDF.java
+C:\Users\Usuario\OneDrive\Documentos\NetBeansProjects\ScrumPoker\src\main\java\controlador\ReportePDFControlador.java
 C:\Users\Usuario\OneDrive\Documentos\NetBeansProjects\ScrumPoker\src\main\java\modelo\EstadoSala.java
 C:\Users\Usuario\OneDrive\Documentos\NetBeansProjects\ScrumPoker\src\main\java\modelo\HistoriaUsuario.java
 C:\Users\Usuario\OneDrive\Documentos\NetBeansProjects\ScrumPoker\src\main\java\modelo\IVotable.java
@@ -23,3 +24,4 @@ C:\Users\Usuario\OneDrive\Documentos\NetBeansProjects\ScrumPoker\src\main\java\v
 C:\Users\Usuario\OneDrive\Documentos\NetBeansProjects\ScrumPoker\src\main\java\vista\Main.java
 C:\Users\Usuario\OneDrive\Documentos\NetBeansProjects\ScrumPoker\src\main\java\vista\MenuModerador.java
 C:\Users\Usuario\OneDrive\Documentos\NetBeansProjects\ScrumPoker\src\main\java\vista\RegistrarVotoVista.java
+C:\Users\Usuario\OneDrive\Documentos\NetBeansProjects\ScrumPoker\src\main\java\vista\ReportePDFVista.java
